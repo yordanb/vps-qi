@@ -11,7 +11,6 @@ require('dotenv').config();
 //const swaggerDocs = require('./swagger.json'); // Atau gunakan swagger-jsdoc jika dinamis
 
 const app = express();
-//const port = 5005;
 
 app.use(cors());
 app.use(bodyParser.json());
