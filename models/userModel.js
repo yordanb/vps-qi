@@ -33,7 +33,7 @@ async function getRoleByNRPandPassADM(nrp,password) {
 
 async function getRoleByAndroidID(devID) {
   try {
-    const [rows] = await pool.execute(`SELECT * FROM tb_users WHERE android_id = ?`, [devID]); //console.log(rows);
+    const [rows] = await pool.execute(`SELECT * FROM tb_users WHERE android_id = ?`, [devID]); console.log(rows);
     return rows.length > 0 ? rows : null;
   } catch (error) {
     console.error(error);
