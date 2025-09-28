@@ -37,8 +37,8 @@ async function getSSStaff(section) {
               COUNT(s."NomorSS") AS "JmlSS"
        FROM tb_manpower_new m
        LEFT JOIN tb_ssplt2 s ON m."NRP" = s."NRP"
-       WHERE m."Posisi" = 'Staff'
-         AND m."Status" = 'Aktif'
+       WHERE m."Posisi" = 'staff'
+         AND m."Status" = 'aktif'
          AND m."Section" = $1
        GROUP BY m."Nama"
        ORDER BY COUNT(s."NomorSS") ASC`,
@@ -91,8 +91,8 @@ async function getSSMekanik(id) {
               COUNT(s."NomorSS") AS "JmlSS"
        FROM tb_manpower_new m
        LEFT JOIN tb_ssplt2 s ON m."NRP" = s."NRP"
-       WHERE m."Posisi" = 'Mekanik'
-         AND m."Status" = 'Aktif'
+       WHERE m."Posisi" = 'mekanik'
+         AND m."Status" = 'aktif'
          AND m."Crew" = $1
        GROUP BY m."Nama"
        ORDER BY COUNT(s."NomorSS") ASC`,
