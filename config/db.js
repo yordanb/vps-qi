@@ -1,19 +1,3 @@
-/*
-const mysql = require('mysql2/promise');
-
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'db_qiagent',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
-
-module.exports = pool;
-*/
-
 const { Pool } = require('pg');
 
 const pool = new Pool({
@@ -26,14 +10,14 @@ const pool = new Pool({
   idleTimeoutMillis: 30000
 });
 
-// Cek koneksi saat startup
+// Tes koneksi saat startup
 pool.connect()
   .then(client => {
-    console.log('✅ Connected to PostgreSQL');
+    console.log(`✅ Connected to PostgreSQL at ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5432}`);
     client.release();
   })
   .catch(err => {
-    console.error('❌ Failed to connect to PostgreSQL:', err.message);
+    console.error('❌ PostgreSQL connection failed:', err.message);
   });
 
 module.exports = pool;
