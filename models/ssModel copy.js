@@ -2,31 +2,29 @@ const pool = require('../config/db');
 
 async function getSSById(id) {
   try {
-    // Query SS berdasarkan NRP
-    const result = await pool.query(
-      'SELECT * FROM tb_ssplt2 WHERE "NRP" = $1 ORDER BY "TanggalLaporanPoin" DESC',
-      [id]
-    );
-    const rows = result.rows;
-
-    // Ambil lastUpdate (pastikan getLastUpdate sudah pakai Postgres juga)
+    const [rows] = await pool.execute('SELECT * FROM tb_ssplt2 WHERE NRP = ?', [id]);
+    //return rows;
+    //const [nama] = await pool.execute('SELECT Nama, NRP FROM tb_manpower_new WHERE NRP = ?', [id]);
     const lastUpdate = await getLastUpdate();
 
-    // Modifikasi judul (capitalize sentence case)
     const modifiedRows = rows.map(row => ({
       ...row,
-      Judul: toBeginningOfSentenceCase(row.Judul)
+      Judul: toBeginningOfSentenceCase(row.Judul) // Terapkan fungsi kapitalisasi
     }));
 
-    return {
-      lastUpdate,
-      data: modifiedRows
-    };
+    const result = {
+        //name: nama.Nama,
+        lastUpdate: lastUpdate,
+        data: modifiedRows
+    }; //console.log(result);
+
+    return result;
   } catch (error) {
-    console.error('Error getSSById:', error);
+    console.error(error);
     throw error;
   }
 }
+
 
 async function getSSStaff(section) {
   try {
@@ -325,21 +323,7 @@ async function getLastUpdateSSAB() {
     }
 }
 
-async function getLastUpdate() {
-  try {
-    // Ambil waktu update terakhir dari tabel
-    const result = await pool.query(
-      'SELECT MAX("LastUpdate") AS last_update FROM tb_ssplt2'
-    );
 
-    return result.rows.length > 0 ? result.rows[0].last_update : null;
-  } catch (error) {
-    console.error('Error fetching LastUpdate:', error);
-    throw error;
-  }
-}
-
-/*
 async function getLastUpdate() {
     try {
         const [dataUpdate] = await pool.execute('SELECT tb_ssplt2.update FROM db_qiagent.tb_ssplt2 LIMIT 1');
@@ -349,7 +333,6 @@ async function getLastUpdate() {
         throw error;
     }
 }
-*/
 
 function toBeginningOfSentenceCase(text) {
   if (!text) return '';  // Jika text null atau undefined, kembalikan string kosong
