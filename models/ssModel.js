@@ -30,55 +30,87 @@ async function getSSById(id) {
 
 async function getSSStaff(section) {
   try {
-    const [rows] = await pool.execute('SELECT ANY_VALUE(`tb_manpower_new`.`NRP`) as mp_nrp, ANY_VALUE(`tb_manpower_new`.`Nama`) as mp_nama, ANY_VALUE(`tb_manpower_new`.`Crew`) as mp_crew,COUNT(tb_ssplt2.NomorSS) AS "JmlSS" FROM db_qiagent.tb_manpower_new left join db_qiagent.tb_ssplt2 on tb_manpower_new.NRP = tb_ssplt2.NRP where tb_manpower_new.Posisi ="Staff" and tb_manpower_new.Status ="Aktif" and tb_manpower_new.Section=? GROUP by tb_manpower_new.Nama  ORDER BY COUNT(tb_ssplt2.NomorSS) ASC', [section]);
+    const result = await pool.query(
+      `SELECT MIN(m."NRP") AS "mp_nrp",
+              MIN(m."Nama") AS "mp_nama",
+              MIN(m."Crew") AS "mp_crew",
+              COUNT(s."NomorSS") AS "JmlSS"
+       FROM tb_manpower_new m
+       LEFT JOIN tb_ssplt2 s ON m."NRP" = s."NRP"
+       WHERE m."Posisi" = 'Staff'
+         AND m."Status" = 'Aktif'
+         AND m."Section" = $1
+       GROUP BY m."Nama"
+       ORDER BY COUNT(s."NomorSS") ASC`,
+      [section]
+    );
+
     const lastUpdate = await getLastUpdate();
 
-    const result = {
-        lastUpdate: lastUpdate,
-        data: rows
+    return {
+      lastUpdate,
+      data: result.rows
     };
-
-    return result;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
 }
 
 async function getSSMekanik(id) {
-    switch (id) {
-        case "pch":
-          section = "mekanik pch";
-          break;
-        case "mobile":
-          section = "mekanik mobile";
-          break;
-        case "big wheel":
-          section = "mekanik big wheel";
-          break;
-        case "lighting":
-          section = "mekanik lighting";
-          break;
-        case "pumping":
-          section = "mekanik pumping";
-          break;
-    }
+  let section;
+  switch (id) {
+    case "pch":
+      section = "mekanik pch";
+      break;
+    case "mobile":
+      section = "mekanik mobile";
+      break;
+    case "big wheel":
+      section = "mekanik big wheel";
+      break;
+    case "lighting":
+      section = "mekanik lighting";
+      break;
+    case "pumping":
+      section = "mekanik pumping";
+      break;
+    default:
+      section = null;
+  }
+
+  if (!section) {
+    throw new Error("Invalid section id");
+  }
 
   try {
-   const [rows] = await pool.execute('SELECT ANY_VALUE(`tb_manpower_new`.`NRP`) as "mp_nrp", ANY_VALUE(`tb_manpower_new`.`Nama`) as "mp_nama", ANY_VALUE(`tb_manpower_new`.`Crew`) as "mp_crew", COUNT(tb_ssplt2.NomorSS) AS "JmlSS" FROM db_qiagent.tb_manpower_new LEFT JOIN db_qiagent.tb_ssplt2 ON tb_manpower_new.NRP = tb_ssplt2.NRP WHERE tb_manpower_new.Posisi = "Mekanik" AND tb_manpower_new.Status = "Aktif" AND tb_manpower_new.Crew = ? GROUP BY tb_manpower_new.Nama ORDER BY COUNT(tb_ssplt2.NomorSS) ASC', [section]);
-    const lastUpdate = await getLastUpdate(); //console.log(lastUpdate);
+    const result = await pool.query(
+      `SELECT MIN(m."NRP") AS "mp_nrp",
+              MIN(m."Nama") AS "mp_nama",
+              MIN(m."Crew") AS "mp_crew",
+              COUNT(s."NomorSS") AS "JmlSS"
+       FROM tb_manpower_new m
+       LEFT JOIN tb_ssplt2 s ON m."NRP" = s."NRP"
+       WHERE m."Posisi" = 'Mekanik'
+         AND m."Status" = 'Aktif'
+         AND m."Crew" = $1
+       GROUP BY m."Nama"
+       ORDER BY COUNT(s."NomorSS") ASC`,
+      [section]
+    );
 
-    const result = {
-        lastUpdate: lastUpdate,
-        data: rows
+    const lastUpdate = await getLastUpdate();
+
+    return {
+      lastUpdate,
+      data: result.rows
     };
-
-    return result;
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
 }
+
 
 async function getAcvhSSById(id) {
   try {
